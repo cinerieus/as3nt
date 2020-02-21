@@ -18,8 +18,8 @@ As3nt can target TLDs or subdomains. The enumeration uses; VirusTotal, HackerTar
 	* `git clone https://github.com/cinerieus/as3nt.git && cd as3nt/`  
 	* `pip install -r requirements.txt`
 	* `python ./as3nt/core.py` 
-	* Alternatively clone and run `python setup.py install`. 
-2. Remember to check PATH if you installed in ~/.local/bin/. 
+	* Alternatively clone and run `python setup.py install` 
+2. Remember to check PATH if you installed in ~/.local/bin/ 
 3. Profit! 
 
 *For Shodan functionality set the environment variable 'SHODANKEY' with your API key. 
