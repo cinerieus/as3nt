@@ -1,0 +1,6 @@
+/as3nt/*.pyc
+/as3nt/__pycache__/
+/dist/
+/build/
+/*.egg-info
+publish.sh 

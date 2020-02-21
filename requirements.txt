@@ -1,0 +1,14 @@
+certifi==2019.11.28
+chardet==3.0.4
+Click==7.0
+click-plugins==1.1.1
+colorama==0.4.3
+dnspython==1.16.0
+idna==2.9
+ipwhois==1.1.0
+requests==2.23.0
+shodan==1.21.3
+termcolor==1.1.0
+tqdm==4.43.0
+urllib3==1.25.8
+XlsxWriter==1.2.7
