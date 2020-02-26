@@ -129,7 +129,7 @@ class As3nt:
         #gets ASN data using ipwhois module and RDAP lookup
         try:
             whois = ipwhois.IPWhois(asset['ip'])
-            asdata = whois.lookup_rdap()
+            asdata = whois.lookup_rdap(asn_methods=['dns', 'whois', 'http'])
             asn = asdata['asn']
             asndesc = asdata['asn_description']
             try:
