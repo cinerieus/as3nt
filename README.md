@@ -16,11 +16,13 @@ Along with using the tags from Shodan, this tool also adds it's own tags. Curren
 ## Installation 
 1. Install:
   - with pip: `pip install as3nt`
-  - from git: 
+  - from git (source): 
 	- `git clone https://github.com/cinerieus/as3nt.git && cd as3nt/`  
 	- `pip install -r requirements.txt`
 	- `python ./as3nt/core.py` 
-	- Alternatively clone and run `python setup.py install` 
+  - from git (releases):
+	- `wget https://github.com/cinerieus/as3nt/archive/v1.0.1.tar.gz`
+	- `pip install v1.0.1.tar.gz` 
 2. Remember to check PATH if you installed in ~/.local/bin/ 
 3. Profit! 
 
