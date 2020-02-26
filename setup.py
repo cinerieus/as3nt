@@ -1,12 +1,15 @@
 import setuptools
 
+with open('README.md', 'r') as fh:
+    long_desc = fh.read()
+
 setuptools.setup(
         name = 'as3nt',
-        version = '1.0.0',
+        version = '1.0.1',
         author = 'cinereus',
         author_email = 'cinereus@protonmail.com',
         description = 'Another Subdomain ENumeration Tool',
-        long_description = '[https://github.com/cinerieus/as3nt](https://github.com/cinerieus/as3nt)',
+        long_description = long_desc,
         long_description_content_type="text/markdown",
         url = 'https://github.com/cinerieus/as3nt',
         packages = ['as3nt'],

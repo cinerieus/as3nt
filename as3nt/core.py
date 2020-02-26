@@ -36,12 +36,15 @@ class As3nt:
             if not self.subdomains:
                 subenum = SubEnum(self.target)
                 sublist = subenum.main()
+                if not sublist:
+                    print(colored('No subdomains for: '+self.target+'\n', 'green'))
+                    return
                 if self.subonly:
                     if self.output:
                         with open(self.output, 'w') as f:
                             for s in sublist:
                                 f.write(s+'\n')
-                        print(colored('Results saved to: '+self.output, 'green'))
+                        print(colored('Results saved to: '+self.output+'\n', 'green'))
                     return
             else:
                 sublist = self.target
@@ -83,7 +86,7 @@ class As3nt:
 
 
         except Exception as e:
-            print('\nError in as3nt.main:')
+            print('\nError in run:')
             print(e)
             sys.exit(2)
 
@@ -121,7 +124,7 @@ class As3nt:
             except:
                 pass
         except Exception as e:
-            print('\nError in as3nt.getrecords:')
+            print('\nError in getrecords:')
             print(e)
             sys.exit(2)
     
@@ -146,7 +149,7 @@ class As3nt:
                 pass
             self.datadict[asset['subdomain']+asset['ip']].update({'asn':asn, 'asn_description':asndesc, 'asn_netblock':cidr, 'asn_netname':name}) 
         except Exception as e:
-            #print('\nError in as3nt.getasn:')
+            #print('\nError in getasn:')
             #print(e)
             #sys.exit(2)
             pass
@@ -160,7 +163,7 @@ class As3nt:
                         'tomcat',
                         'fortinet',
                         'netscaler',
-                        'pulse'
+                        'pulse connect'
                         ]
 
                 results = api.host(asset['ip'])
@@ -200,7 +203,7 @@ class As3nt:
                         for r in results['data'][i]['vulns'].values():
                             try:
                                 cvss = r['cvss']
-                                if cvss == 10:
+                                if cvss >= 7.8:
                                     if 'possible_exploit!' not in tags:
                                         tags.append('possible_exploit!')
                                         break
@@ -218,7 +221,7 @@ class As3nt:
                 pass
             self.datadict[asset['subdomain']+asset['ip']].update({'shodan_os':OS, 'shodan_tags':tags, 'shodan_ports':ports, 'shodan_vulns':vulns, 'shodan_isp':isp, 'shodan_org':org, 'shodan_country':country})
         except Exception as e:
-            #print('\nError in as3nt.getshodan:')
+            #print('\nError in getshodan:')
             #print(e)
             #sys.exit(2)
             pass
@@ -237,7 +240,6 @@ def main():
     optional.add_argument('-11', action='store_true', dest='eleven', help='Choose this option to enable all modules.')
     optional.add_argument('-as', action='store_true', dest='asn', help='This option enables the ASN data module.')
     optional.add_argument('-sh', action='store_true', dest='shodan', help='This option enables the Shodan data module.')
-    #optional.add_argument('-ssl', action='store_true', dest='ssl', help='This option enables the SSL data module.')
     args = parser.parse_args()
 
     # banner
@@ -313,7 +315,7 @@ Optional arguments:
                 as3nt = As3nt(t,args.threads,args.asn,args.shodan,args.output,shodankey,args.subdomains,args.subonly)
                 as3nt.run()
             except Exception as e:
-                print('\nError in __main__:')
+                print('\nError in main:')
                 print(e)
                 sys.exit(1)
     else:
@@ -321,7 +323,7 @@ Optional arguments:
             as3nt = As3nt(target,args.threads,args.asn,args.shodan,args.output,shodankey,args.subdomains,args.subonly)
             as3nt.run()
         except Exception as e:
-            print('\nError in __main__:')
+            print('\nError in main:')
             print(e)
             sys.exit(1)
 
