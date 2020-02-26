@@ -7,7 +7,7 @@ Another Subdomain ENumeration Tool - written in python to enumerate and enrich s
 
 As3nt can target TLDs or subdomains. The enumeration uses; VirusTotal, HackerTarget, ThreatCrowd, ThreatMiner, BufferOver, urlscan.io and crt.sh. Each subdomain IP is resolved using public DNS servers and the data is enriched using ipwhois and Shodan. As3nt currently outputs to terminal or csv. 
 
-Along with using the tags from Shodan, this tool also adds it's own tags. Currently there are tags added based on certain HTML content found by Shodan like tomcat, fortinet, netscaler and pulse vpn. Also if any CVEs are found for an IP/Subdomain with a CVSS score of 10, these assets are tagged to highlight a possible exploit. 
+Along with using the tags from Shodan, this tool also adds it's own tags. Currently there are tags added based on certain HTML content found by Shodan like tomcat, fortinet, netscaler and pulse vpn. Also if any CVEs are found for an IP/Subdomain with a CVSS score >= 7.8, these assets are tagged to highlight a possible exploit. 
 
 ## Screenshots 
 ![As3nt_1](https://github.com/cinerieus/as3nt/blob/master/screenshots/as3nt_1.gif)  
