@@ -3,4 +3,5 @@
 /dist/
 /build/
 /*.egg-info
+/.eggs
 publish.sh 
