@@ -1,5 +1,8 @@
 # Changelog 
 
+## 1.0.2 
+- Removed stray full stop in subenum module. 
+
 ## 1.0.1
 - Updated error messages. 
 - Changed string for pulse vpn tag to stop false positives. 
