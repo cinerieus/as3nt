@@ -88,7 +88,7 @@ class SubEnum:
     # HackerTarget feed
     def HackerTarget(self):
         try:
-            get = requests.get('https://api.hackertarget.com/hostsearch/?q=.'+self.tld)
+            get = requests.get('https://api.hackertarget.com/hostsearch/?q='+self.tld)
             if get.text == 'API count exceeded - Increase Quota with Membership':
                 print(colored('[-] HackerTarget - API quota exceeded!', 'red'))       
             elif get.text != 'error check your search parameter':
