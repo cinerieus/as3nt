@@ -1,4 +1,4 @@
-![Version 1.0.1](http://img.shields.io/badge/version-v1.0.1-purple.svg)
+![Version 1.0.2](http://img.shields.io/badge/version-v1.0.2-purple.svg)
 ![Python 3.8](http://img.shields.io/badge/python-3.8-yellow.svg)
 [![GPL License](http://img.shields.io/badge/license-GPL%20License-blue.svg)](https://github.com/cinerieus/as3nt/blob/master/LICENSE)  
 
