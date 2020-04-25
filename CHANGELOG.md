@@ -1,5 +1,9 @@
 # Changelog 
 
+## 1.0.3
+- Added more error handling for crt.sh source.
+- Added fix for different format from BufferOver.
+
 ## 1.0.2 
 - Removed stray full stop in subenum module. 
 

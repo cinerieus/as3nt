@@ -5,7 +5,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
         name = 'as3nt',
-        version = '1.0.2',
+        version = '1.0.3',
         author = 'cinereus',
         author_email = 'cinereus@protonmail.com',
         description = 'Another Subdomain ENumeration Tool',

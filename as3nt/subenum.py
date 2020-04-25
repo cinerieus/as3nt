@@ -78,12 +78,8 @@ class SubEnum:
                     self.sublist.append(x['id'])
                 if 'next' in jsondata['links']:
                     urls.append(jsondata['links']['next'])
-        except Exception as e:
-            #print('Error in subenum.VirusTotal:')
-            #print(e)
-            #sys.exit(2)
+        except:
             print(colored('[-] VirusTotal - Hit rate limiting!', 'red'))
-            pass
     
     # HackerTarget feed
     def HackerTarget(self):
@@ -95,11 +91,9 @@ class SubEnum:
                 result = get.text.split('\n')
                 for r in result:
                     self.sublist.append(r.split(',')[0])
-        except Exception as e:
-            print('Error in HackerTarget:')
-            print(e)
-            sys.exit(2)
-    
+        except:
+            print(colored('[-] HackerTarget - Error in response!', 'red'))       
+
     # ThreatCrowd feed
     def ThreatCrowd(self):
         try:
@@ -107,10 +101,8 @@ class SubEnum:
             result = json.loads(get.text)
             if result['response_code'] != '0':
                 self.sublist.extend(result['subdomains'])
-        except Exception as e:
-            print('Error in ThreatCrowd:')
-            print(e)
-            sys.exit(2)
+        except:
+            print(colored('[-] ThreatCrowd - Error in response!', 'red'))       
 
     # ThreatMiner feed
     def ThreatMiner(self):
@@ -119,10 +111,8 @@ class SubEnum:
             result = json.loads(get.text)
             if result['status_code'] != '404':
                 self.sublist.extend(result['results'])
-        except Exception as e:
-            print('Error in ThreatMiner:')
-            print(e)
-            sys.exit(2)
+        except:
+            print(colored('[-] ThreatMiner - Error in response!', 'red'))       
     
     # BufferOver feed
     def BufferOver(self):
@@ -135,12 +125,14 @@ class SubEnum:
             if result['RDNS']:
                 mlist.extend(result['RDNS'])
             for i in mlist:
-                self.sublist.append(i.split(',')[1])
-        except Exception as e:
-            print('Error in BufferOver:')
-            print(e)
-            sys.exit(2)
-    
+                try:
+                    self.sublist.append(i.split(',')[1])
+                except:
+                    self.sublist.append(i)
+                    pass
+        except:
+            print(colored('[-] BufferOver - Error in response!', 'red'))
+
     # urlscan.io feed
     def urlscan_io(self):
         try:
@@ -149,29 +141,26 @@ class SubEnum:
             if result['total'] != '0':
                 for r in result['results']:
                     self.sublist.append(r['page']['domain'])
-        except Exception as e:
-            print('Error in urlscan_io:')
-            print(e)
-            sys.exit(2)
+        except:
+            print(colored('[-] urlscan.io - Error in response!', 'red'))
 
     # crt.sh feed
     def crt_sh(self):
         try:
             get = requests.get('https://crt.sh/?q=.'+self.tld+'&output=json')
-            result = json.loads(get.text)
-            if len(result) != 0:
-                for r in result:
-                    if '\n' in r['name_value']:
-                        subs = r['name_value'].split('\n')
-                    else:
-                        subs = [r['name_value']]
-                    for s in subs:
-                        if '*' not in s:
-                            self.sublist.append(s)
-        except Exception as e:
-            print('Error in crt_sh:')
-            print(e)
-            sys.exit(2)
+            if get.status_code == 200:
+                result = json.loads(get.text)
+                if len(result) != 0:
+                    for r in result:
+                        if '\n' in r['name_value']:
+                            subs = r['name_value'].split('\n')
+                        else:
+                            subs = [r['name_value']]
+                        for s in subs:
+                            if '*' not in s:
+                                self.sublist.append(s)
+        except:
+            print(colored('[-] crt.sh - Error in response!', 'red'))
 
 # check if being used as module, allows being run standalone
 if __name__ == '__main__':
