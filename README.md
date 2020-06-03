@@ -32,7 +32,7 @@ Along with using the tags from Shodan, this tool also adds it's own tags. Curren
 See [requirements.txt](https://github.com/cinerieus/as3nt/blob/master/requirements.txt) 
 
 ## Changelog
-See [CHANGELOG.md](https://github.com/cinereus/as3nt/blob/master/CHANGELOG.md) 
+See [CHANGELOG.md](https://github.com/cinerieus/as3nt/blob/master/CHANGELOG.md) 
 
 ## Usage 
 ![usage](https://github.com/cinerieus/as3nt/blob/master/screenshots/usage.png)  
