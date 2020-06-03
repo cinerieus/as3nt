@@ -13,9 +13,13 @@ import argparse
 import dns.resolver
 from tqdm import tqdm
 from shodan import Shodan
-from as3nt.subenum import SubEnum
 from termcolor import colored
 from concurrent.futures import ThreadPoolExecutor
+
+try:
+    from as3nt.subenum import SubEnum
+except:
+    from subenum import SubEnum
 
 class As3nt:
     #class initialisation, declares instance variables and calls main()
@@ -66,25 +70,25 @@ class As3nt:
                     time.sleep(1)
             #output option check, writes to csv also checks for existing file to prevent duplicating header
             if self.output:
+
                 dictlist = list(self.datadict.values())
                 if not os.path.isfile(self.output):
                     with open(self.output, 'w') as f:
-                        w = csv.DictWriter(f, dictlist[1].keys())
+                        w = csv.DictWriter(f, dictlist[0].keys())
                         w.writeheader()
                         w.writerows(dictlist)
                     print(colored('Results saved to: '+self.output, 'green'))
                 else:
                     with open(self.output, 'a') as f:
-                        w = csv.DictWriter(f, dictlist[1].keys())
+                        w = csv.DictWriter(f, dictlist[0].keys())
                         w.writerows(dictlist)
                     print(colored('Results saved to: '+self.output, 'green'))
             else:
                 dictlist = list(self.datadict.values())
                 for item in dictlist:
                     print(item)
-
-
-
+        except KeyboardInterrupt:
+            raise
         except Exception as e:
             print('\nError in run:')
             print(e)
@@ -119,10 +123,13 @@ class As3nt:
             try: 
                 MX = resolver.query(subdomain, 'MX')
                 for rec in MX.response.answer:
+
                     for x in rec.items:
                         self.datadict[subdomain+x.to_text()] = {'tld':self.target, 'subdomain':subdomain, 'record':'MX', 'ip':x.to_text().split(' ')[1]}
             except:
                 pass
+        except KeyboardInterrupt:
+            raise
         except Exception as e:
             print('\nError in getrecords:')
             print(e)
@@ -148,6 +155,8 @@ class As3nt:
                     pass
                 pass
             self.datadict[asset['subdomain']+asset['ip']].update({'asn':asn, 'asn_description':asndesc, 'asn_netblock':cidr, 'asn_netname':name}) 
+        except KeyboardInterrupt:
+            raise
         except Exception as e:
             #print('\nError in getasn:')
             #print(e)
@@ -209,7 +218,6 @@ class As3nt:
                                         break
                             except:
                                 pass
-
             except Exception as e:
                 ports = ''
                 tags = ''
@@ -220,6 +228,8 @@ class As3nt:
                 vulns = ''
                 pass
             self.datadict[asset['subdomain']+asset['ip']].update({'shodan_os':OS, 'shodan_tags':tags, 'shodan_ports':ports, 'shodan_vulns':vulns, 'shodan_isp':isp, 'shodan_org':org, 'shodan_country':country})
+        except KeyboardInterrupt:
+            raise
         except Exception as e:
             #print('\nError in getshodan:')
             #print(e)
@@ -310,18 +320,25 @@ Optional arguments:
 
     #checks for list of subdomains or tlds
     if not args.subdomains:
-        for t in target:
-            try:
-                as3nt = As3nt(t,args.threads,args.asn,args.shodan,args.output,shodankey,args.subdomains,args.subonly)
+        try:
+            for t in target:
+                as3nt =  As3nt(t,args.threads,args.asn,args.shodan,args.output,shodankey,args.subdomains,args.subonly)
                 as3nt.run()
-            except Exception as e:
-                print('\nError in main:')
-                print(e)
-                sys.exit(1)
+                print('\n')
+        except KeyboardInterrupt:
+            print(colored('Exiting...', 'red'))
+            exit(0)
+        except Exception as e:
+            print('\nError in main:')
+            print(e)
+            sys.exit(1)
     else:
         try:
-            as3nt = As3nt(target,args.threads,args.asn,args.shodan,args.output,shodankey,args.subdomains,args.subonly)
+            as3nt = As3nt(target,args.threads,args.asn,args.shodan,args.output,shodankey,args.subdomains,args.subonly) 
             as3nt.run()
+        except KeyboardInterrupt:
+            print(colored('Exiting...', 'red'))
+            exit(0)
         except Exception as e:
             print('\nError in main:')
             print(e)

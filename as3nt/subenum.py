@@ -74,10 +74,13 @@ class SubEnum:
             for url in urls:
                 get = requests.get(url)
                 jsondata = json.loads(get.text)
-                for x in jsondata['data']:
-                    self.sublist.append(x['id'])
-                if 'next' in jsondata['links']:
-                    urls.append(jsondata['links']['next'])
+                if 'data' in jsondata.keys():
+                    for x in jsondata['data']:
+                        self.sublist.append(x['id'])
+                    if 'next' in jsondata['links']:
+                        urls.append(jsondata['links']['next'])
+        except KeyboardInterrupt:
+            raise
         except:
             print(colored('[-] VirusTotal - Hit rate limiting!', 'red'))
     
@@ -91,6 +94,8 @@ class SubEnum:
                 result = get.text.split('\n')
                 for r in result:
                     self.sublist.append(r.split(',')[0])
+        except KeyboardInterrupt:
+            raise
         except:
             print(colored('[-] HackerTarget - Error in response!', 'red'))       
 
@@ -101,6 +106,8 @@ class SubEnum:
             result = json.loads(get.text)
             if result['response_code'] != '0':
                 self.sublist.extend(result['subdomains'])
+        except KeyboardInterrupt:
+            raise
         except:
             print(colored('[-] ThreatCrowd - Error in response!', 'red'))       
 
@@ -111,6 +118,8 @@ class SubEnum:
             result = json.loads(get.text)
             if result['status_code'] != '404':
                 self.sublist.extend(result['results'])
+        except KeyboardInterrupt:
+            raise
         except:
             print(colored('[-] ThreatMiner - Error in response!', 'red'))       
     
@@ -130,6 +139,8 @@ class SubEnum:
                 except:
                     self.sublist.append(i)
                     pass
+        except KeyboardInterrupt:
+            raise
         except:
             print(colored('[-] BufferOver - Error in response!', 'red'))
 
@@ -141,6 +152,8 @@ class SubEnum:
             if result['total'] != '0':
                 for r in result['results']:
                     self.sublist.append(r['page']['domain'])
+        except KeyboardInterrupt:            
+            raise
         except:
             print(colored('[-] urlscan.io - Error in response!', 'red'))
 
@@ -159,6 +172,8 @@ class SubEnum:
                         for s in subs:
                             if '*' not in s:
                                 self.sublist.append(s)
+        except KeyboardInterrupt:
+            raise
         except:
             print(colored('[-] crt.sh - Error in response!', 'red'))
 

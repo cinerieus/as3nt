@@ -1,5 +1,9 @@
 # Changelog 
 
+## 1.0.4
+- Added check for data returned from Virustotal feed.
+- Added a few things to help with clean exiting.
+
 ## 1.0.3
 - Added more error handling for crt.sh source.
 - Added fix for different format from BufferOver.
