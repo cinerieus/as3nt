@@ -97,13 +97,13 @@ class As3nt:
     def getrecords(self,subdomain):
         #handles getting the records for each subdomain, dns server(s) is specified below
         try:
-            resolver = dns.resolver.Resolver()
+            resolver = dns.resolver.Resolver(configure=False)
             resolver.nameservers = ['1.1.1.1', '1.0.0.1']
             resolver.timeout = 3
             resolver.lifetime = 3
             #gets A records and starts populating main dict, drops CNAME
             try: 
-                A = resolver.query(subdomain, 'A')
+                A = resolver.resolve(subdomain, 'A')
                 for rec in A.response.answer:
                     if 'CNAME' not in rec.to_text():
                         for x in rec.items:
@@ -112,7 +112,7 @@ class As3nt:
                 pass
             #gets AAAA records, drops CNAME
             try: 
-                AAAA = resolver.query(subdomain, 'AAAA')
+                AAAA = resolver.resolve(subdomain, 'AAAA')
                 for rec in AAAA.response.answer:
                     if 'CNAME' not in rec.to_text():
                         for x in rec.items:
@@ -121,7 +121,7 @@ class As3nt:
                 pass
             #gets MX records, note these are also a subdomain rather than IP.
             try: 
-                MX = resolver.query(subdomain, 'MX')
+                MX = resolver.resolve(subdomain, 'MX')
                 for rec in MX.response.answer:
 
                     for x in rec.items:
