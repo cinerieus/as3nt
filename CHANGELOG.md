@@ -1,5 +1,8 @@
 # Changelog 
 
+## 1.0.5
+- Fixed deprecated dns resolver config.
+
 ## 1.0.4
 - Added check for data returned from Virustotal feed.
 - Added a few things to help with clean exiting.
