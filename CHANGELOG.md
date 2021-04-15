@@ -1,5 +1,8 @@
 # Changelog 
 
+## 1.0.6
+- Fixed broken dependencies.
+
 ## 1.0.5
 - Fixed deprecated dns resolver config.
 

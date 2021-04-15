@@ -109,7 +109,7 @@ class SubEnum:
         except KeyboardInterrupt:
             raise
         except:
-            print(colored('[-] ThreatCrowd - Error in response!', 'red'))       
+            print(colored('[-] ThreatCrowd - Hit rate limiting!', 'red'))       
 
     # ThreatMiner feed
     def ThreatMiner(self):
