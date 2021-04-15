@@ -71,17 +71,18 @@ class As3nt:
             #output option check, writes to csv also checks for existing file to prevent duplicating header
             if self.output:
                 dictlist = list(self.datadict.values())
-                header = max(self.datadict.values(), key=lambda k: len(self.datadict.values()[k]))
+                keylist = [list(x.keys()) for x in dictlist]
+                header = max(keylist, key=len)
                 if not os.path.isfile(self.output):
                     with open(self.output, 'w') as f:
-                        w = csv.DictWriter(f, dictlist[header].keys(), extrasaction='ignore')
+                        w = csv.DictWriter(f, header, extrasaction='ignore')
                         #w = csv.DictWriter(f, dictlist[header].keys())
                         w.writeheader()
                         w.writerows(dictlist)
                     print(colored('Results saved to: '+self.output, 'green'))
                 else:
                     with open(self.output, 'a') as f:
-                        w = csv.DictWriter(f, dictlist[header].keys(), extrasaction='ignore')
+                        w = csv.DictWriter(f, header, extrasaction='ignore')
                         #w = csv.DictWriter(f, dictlist[header].keys())
                         w.writerows(dictlist)
                     print(colored('Results saved to: '+self.output, 'green'))

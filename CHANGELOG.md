@@ -1,5 +1,8 @@
 # Changelog 
 
+## 1.0.8
+- Added CSV header code.
+
 ## 1.0.7
 - Improved reults handling for less errors when writing data to file.
 
