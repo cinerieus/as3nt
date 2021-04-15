@@ -1,4 +1,4 @@
-![Version 1.0.6](http://img.shields.io/badge/version-v1.0.6-purple.svg)
+![Version 1.0.7](http://img.shields.io/badge/version-v1.0.7-purple.svg)
 ![Python 3.8](http://img.shields.io/badge/python-3.8-yellow.svg)
 [![GPL License](http://img.shields.io/badge/license-GPL%20License-blue.svg)](https://github.com/cinerieus/as3nt/blob/master/LICENSE)  
 
@@ -21,8 +21,8 @@ Along with using the tags from Shodan, this tool also adds it's own tags. Curren
 	- `pip install -r requirements.txt`
 	- `python ./as3nt/core.py` 
   - from git (releases):
-	- `wget https://github.com/cinerieus/as3nt/archive/v1.0.6.tar.gz`
-	- `pip install v1.0.6.tar.gz` 
+	- `wget https://github.com/cinerieus/as3nt/archive/v1.0.7.tar.gz`
+	- `pip install v1.0.7.tar.gz` 
 2. Remember to check PATH if you installed in ~/.local/bin/ 
 3. Profit! 
 
