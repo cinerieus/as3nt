@@ -1,5 +1,8 @@
 # Changelog 
 
+## 1.0.9
+- Fixed issue with bulk ASN lookups.
+
 ## 1.0.8
 - Added CSV header code.
 
