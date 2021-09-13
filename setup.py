@@ -27,7 +27,7 @@ setuptools.setup(
         install_requires = [
             'shodan',
             'tqdm',
-            'dnspython',
+            'dnspython==2.0.0',
             'ipwhois',
             'termcolor'
             ],
