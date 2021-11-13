@@ -10,10 +10,13 @@ import csv
 import time
 import ipwhois
 import argparse
+import subprocess
 import dns.resolver
 from tqdm import tqdm
 from shodan import Shodan
+from datetime import datetime
 from termcolor import colored
+from elasticsearch import Elasticsearch
 from concurrent.futures import ThreadPoolExecutor
 
 try:
@@ -23,7 +26,7 @@ except:
 
 class As3nt:
     #class initialisation, declares instance variables and calls main()
-    def __init__(self,target,threads,asn,shodan,output,shodankey,subdomains,subonly):
+    def __init__(self,target,threads,asn,shodan,output,shodankey,subdomains,subonly,bb):
         self.datadict = {}
         self.target = target
         self.threads = threads
@@ -33,69 +36,7 @@ class As3nt:
         self.shodankey = shodankey
         self.subdomains = subdomains
         self.subonly = subonly
-
-    def run(self):
-        try:
-            #subdomain input check
-            if not self.subdomains:
-                subenum = SubEnum(self.target)
-                sublist = subenum.main()
-                if not sublist:
-                    print(colored('No subdomains for: '+self.target+'\n', 'green'))
-                    return
-                if self.subonly:
-                    if self.output:
-                        with open(self.output, 'w') as f:
-                            for s in sublist:
-                                f.write(s+'\n')
-                        print(colored('Results saved to: '+self.output+'\n', 'green'))
-                    return
-            else:
-                sublist = self.target
-                self.target = 'N/A'
-            #threading for i/o heavy tasks, fetches dns records and asn data for each asset
-            with ThreadPoolExecutor(max_workers=int(self.threads)) as pool:
-                print(colored('\nGetting DNS records...', 'magenta'))
-                list(tqdm(pool.map(self.getrecords, sublist), total=len(sublist)))
-                if self.asn:
-                    print(colored('\nGetting ASN data...', 'magenta'))
-                    aslist = list(self.datadict.values())
-                    list(tqdm(pool.map(self.getasn, aslist), total=len(aslist)))
-            #shodan option check, limited to 1 ip per second by api
-            if self.shodan:
-                api = Shodan(self.shodankey)
-                print(colored('\nGetting Shodan data...', 'magenta'))
-                for asset in tqdm(self.datadict.values()):
-                    self.getshodan(api,asset)
-                    time.sleep(1)
-            #output option check, writes to csv also checks for existing file to prevent duplicating header
-            if self.output:
-                dictlist = list(self.datadict.values())
-                keylist = [list(x.keys()) for x in dictlist]
-                header = max(keylist, key=len)
-                if not os.path.isfile(self.output):
-                    with open(self.output, 'w') as f:
-                        w = csv.DictWriter(f, header, extrasaction='ignore')
-                        #w = csv.DictWriter(f, dictlist[header].keys())
-                        w.writeheader()
-                        w.writerows(dictlist)
-                    print(colored('Results saved to: '+self.output, 'green'))
-                else:
-                    with open(self.output, 'a') as f:
-                        w = csv.DictWriter(f, header, extrasaction='ignore')
-                        #w = csv.DictWriter(f, dictlist[header].keys())
-                        w.writerows(dictlist)
-                    print(colored('Results saved to: '+self.output, 'green'))
-            else:
-                dictlist = list(self.datadict.values())
-                for item in dictlist:
-                    print(item)
-        except KeyboardInterrupt:
-            raise
-        except Exception as e:
-            print('\nError in run:')
-            print(e)
-            sys.exit(2)
+        self.bb = bb
 
     def getrecords(self,subdomain):
         #handles getting the records for each subdomain, dns server(s) is specified below
@@ -238,6 +179,122 @@ class As3nt:
             #print(e)
             #sys.exit(2)
             pass
+
+    def get_screenshots(self):
+        try:
+            subprocess.run(["gowitness", "--disable-db", "file", "-f", "urls.txt", "-P", "/opt/screenshots"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except KeyboardInterrupt:
+            raise
+        except Exception as e: 
+            print("\nError in get_screenshots")
+            print(e)
+            #sys.exit(1)
+            pass
+    
+    def send_data(self, data):
+        try:
+            data["screenshots"] = []
+            sc = os.listdir("/opt/screenshots")
+            for p in data["shodan_ports"]:
+                fn1 = "http-" + data["subdomain"] + "-" + str(p) + ".png"
+                fn2 = "https-" + data["subdomain"] + "-" + str(p) + ".png"
+                if fn1 in sc:
+                    data["screenshots"].append("http://localhost:8080/"+fn1)
+                if fn2 in sc:
+                    data["screenshots"].append("http://localhost:8080/"+fn2)
+            res = self.es.index(index="test", document=data)
+        except KeyboardInterrupt:
+            raise
+        except Exception as e: 
+            print("\nError in send_data")
+            print(e)
+            #sys.exit(1)
+            pass
+
+    def run(self):
+        try:
+            #subdomain input check
+            if not self.subdomains:
+                subenum = SubEnum(self.target)
+                sublist = subenum.main()
+                if not sublist:
+                    print(colored('No subdomains for: '+self.target+'\n', 'green'))
+                    return
+                if self.subonly:
+                    if self.output:
+                        with open(self.output, 'w') as f:
+                            for s in sublist:
+                                f.write(s+'\n')
+                        print(colored('Results saved to: '+self.output+'\n', 'green'))
+                    return
+            else:
+                sublist = self.target
+                self.target = 'N/A'
+            #threading for i/o heavy tasks, fetches dns records and asn data for each asset
+            with ThreadPoolExecutor(max_workers=int(self.threads)) as pool:
+                print(colored('\nGetting DNS records...', 'magenta'))
+                list(tqdm(pool.map(self.getrecords, sublist), total=len(sublist)))
+                if self.asn:
+                    print(colored('\nGetting ASN data...', 'magenta'))
+                    aslist = list(self.datadict.values())
+                    list(tqdm(pool.map(self.getasn, aslist), total=len(aslist)))
+            #shodan option check, limited to 1 ip per second by api
+            if self.shodan:
+                api = Shodan(self.shodankey)
+                print(colored('\nGetting Shodan data...', 'magenta'))
+                for asset in tqdm(self.datadict.values()):
+                    self.getshodan(api,asset)
+                    time.sleep(1)
+            dictlist = list(self.datadict.values())
+            #output option check, writes to csv also checks for existing file to prevent duplicating header
+            if self.bb:
+                docs = []
+                urls = []
+                for item in dictlist:
+                    if "shodan_ports" in item:
+                        docs.append(item)
+                        for p in item["shodan_ports"]:
+                            urls.append(item["subdomain"]+":"+str(p))
+
+                print(colored('\nGetting screenshots...', 'magenta'))
+                with open("urls.txt", "w") as f:
+                    for url in urls:
+                        f.write(url+"\n")
+                self.get_screenshots()
+                os.remove("urls.txt")
+                print(colored('Screenshots saved to: /opt/screenshots', 'green'))
+
+                self.es = Elasticsearch(maxsize=25)
+                with ThreadPoolExecutor(max_workers=int(self.threads)) as pool:
+                    print(colored('\nSending to elastic...', 'magenta'))
+                    list(tqdm(pool.map(self.send_data, docs), total=len(docs)))
+                print(colored('Bounty hunt complete!', 'green'))
+                return
+
+            elif self.output:
+                keylist = [list(x.keys()) for x in dictlist]
+                header = max(keylist, key=len)
+                if not os.path.isfile(self.output):
+                    with open(self.output, 'w') as f:
+                        w = csv.DictWriter(f, header, extrasaction='ignore')
+                        w.writeheader()
+                        w.writerows(dictlist)
+                    print(colored('Results saved to: '+self.output, 'green'))
+                else:
+                    with open(self.output, 'a') as f:
+                        w = csv.DictWriter(f, header, extrasaction='ignore')
+                        w.writerows(dictlist)
+                    print(colored('Results saved to: '+self.output, 'green'))
+            else:
+                for item in dictlist:
+                    print(item)
+        except KeyboardInterrupt:
+            raise
+        except Exception as e:
+            print('\nError in run:')
+            print(e)
+            sys.exit(2)
+
 def main():
     # argument declaration
     parser = argparse.ArgumentParser(description='Another Subdomain ENumeration Tool', usage='as3nt -t example.com -11 -o results.csv')
@@ -249,26 +306,27 @@ def main():
     required.add_argument('-o', action='store', dest='output', help='Outputs to a csv.')
     optional.add_argument('-s', action='store_true', dest='subdomains', help='Use for inputing a list of subdomains.')
     optional.add_argument('-so', action='store_true', dest='subonly', help='If specified, will only perform subdomain enumeration.')
-    optional.add_argument('-td', action='store', dest='threads', help='Specify number of threads used (defaults to 40).', default=40)
+    optional.add_argument('-td', action='store', dest='threads', help='Specify number of threads used (defaults to 25).', default=25)
     optional.add_argument('-11', action='store_true', dest='eleven', help='Choose this option to enable all modules.')
     optional.add_argument('-as', action='store_true', dest='asn', help='This option enables the ASN data module.')
     optional.add_argument('-sh', action='store_true', dest='shodan', help='This option enables the Shodan data module.')
+    optional.add_argument('-bb', action='store_true', dest='bb', help='This option enables screenshots and es data ingest.')
     args = parser.parse_args()
 
     # banner
     print(colored("""
-                  ____        _
-        /\       |___ \      | |
-       /  \   ___  __) |_ __ | |_
-      / /\ \ / __||__ <| '_ \| __|
-     / ____ \\\__ \___) | | | | |_
-    /_/    \_\___/____/|_| |_|\__|
+                      ____        _
+            /\       |___ \      | |
+           /  \   ___  __) |_ __ | |_
+          / /\ \ / __||__ <| '_ \| __|
+         / ____ \\\__ \___) | | | | |_
+        /_/    \_\___/____/|_| |_|\__|
     """, 'magenta'))
     print(colored("""
-        Written by - @cinereus
+            Written by - @cinereus
     """, 'yellow'))
     print(colored("""
-   Another Subdomain ENumeration Tool
+       Another Subdomain ENumeration Tool
     """, 'cyan'))
 
     # checks for empty/incompatible args
@@ -325,7 +383,7 @@ Optional arguments:
     if not args.subdomains:
         try:
             for t in target:
-                as3nt =  As3nt(t,args.threads,args.asn,args.shodan,args.output,shodankey,args.subdomains,args.subonly)
+                as3nt =  As3nt(t,args.threads,args.asn,args.shodan,args.output,shodankey,args.subdomains,args.subonly,args.bb)
                 as3nt.run()
                 print('\n')
         except KeyboardInterrupt:
@@ -337,7 +395,7 @@ Optional arguments:
             sys.exit(1)
     else:
         try:
-            as3nt = As3nt(target,args.threads,args.asn,args.shodan,args.output,shodankey,args.subdomains,args.subonly) 
+            as3nt = As3nt(target,args.threads,args.asn,args.shodan,args.output,shodankey,args.subdomains,args.subonly,args.bb) 
             as3nt.run()
         except KeyboardInterrupt:
             print(colored('Exiting...', 'red'))

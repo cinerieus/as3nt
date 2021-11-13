@@ -29,7 +29,8 @@ setuptools.setup(
             'tqdm',
             'dnspython==2.0.0',
             'ipwhois',
-            'termcolor'
+            'termcolor',
+            'elasticsearch'
             ],
         python_requires = '>=3.6',
         )
