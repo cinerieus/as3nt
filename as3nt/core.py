@@ -203,7 +203,7 @@ class As3nt:
                     data["screenshots"].append("http://127.0.0.1:8082/"+fn1)
                 if fn2 in sc:
                     data["screenshots"].append("http://127.0.0.1:8082/"+fn2)
-            res = self.es.index(index="as3nt-"+str(datetime.now().isocalendar()[1])+"-"+str(datetime.now().isocalendar()[0]), id=hashlib.sha1(bytes(data["subdomain"]+data["ip"], 'utf8')).hexdigest(), document=data)
+            res = self.es.index(index="as3nt-"+self.target+"-"+str(datetime.now().isocalendar()[1])+"-"+str(datetime.now().isocalendar()[0]), id=hashlib.sha1(bytes(data["subdomain"]+data["ip"], 'utf8')).hexdigest(), document=data)
         except KeyboardInterrupt:
             raise
         except Exception as e: 
