@@ -19,10 +19,10 @@ services:
     cap_add:
       - IPC_LOCK
     volumes:
-      - elasticsearch-data:/usr/share/elasticsearch/data
+      - data:/usr/share/elasticsearch/data
     ports:
-      - 9200:9200
-      - 9300:9300
+      - 127.0.0.1:9200:9200
+      - 127.0.0.1:9300:9300
 
   kibana:
     container_name: kibana
@@ -30,10 +30,10 @@ services:
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     ports:
-      - 5601:5601
+      - 127.0.0.1:8081:5601
     depends_on:
       - elasticsearch
 
 volumes:
-  elasticsearch-data:
+  data:
     driver: local

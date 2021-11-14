@@ -8,6 +8,7 @@ import os
 import sys
 import csv
 import time
+import hashlib
 import ipwhois
 import argparse
 import subprocess
@@ -182,7 +183,7 @@ class As3nt:
 
     def get_screenshots(self):
         try:
-            subprocess.run(["gowitness", "--disable-db", "file", "-f", "urls.txt", "-P", "/opt/screenshots"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(["gowitness", "--disable-db", "file", "-f", "urls.txt", "-P", "./as3nt-elastic/screenshots"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except KeyboardInterrupt:
             raise
         except Exception as e: 
@@ -194,15 +195,15 @@ class As3nt:
     def send_data(self, data):
         try:
             data["screenshots"] = []
-            sc = os.listdir("/opt/screenshots")
+            sc = os.listdir("./as3nt-elastic/screenshots")
             for p in data["shodan_ports"]:
                 fn1 = "http-" + data["subdomain"] + "-" + str(p) + ".png"
                 fn2 = "https-" + data["subdomain"] + "-" + str(p) + ".png"
                 if fn1 in sc:
-                    data["screenshots"].append("http://localhost:8080/"+fn1)
+                    data["screenshots"].append("http://127.0.0.1:8082/"+fn1)
                 if fn2 in sc:
-                    data["screenshots"].append("http://localhost:8080/"+fn2)
-            res = self.es.index(index="test", document=data)
+                    data["screenshots"].append("http://127.0.0.1:8082/"+fn2)
+            res = self.es.index(index="as3nt-"+str(datetime.now().isocalendar()[1])+"-"+str(datetime.now().isocalendar()[0]), id=hashlib.sha1(bytes(data["subdomain"]+data["ip"], 'utf8')).hexdigest(), document=data)
         except KeyboardInterrupt:
             raise
         except Exception as e: 
@@ -252,9 +253,10 @@ class As3nt:
                 urls = []
                 for item in dictlist:
                     if "shodan_ports" in item:
-                        docs.append(item)
-                        for p in item["shodan_ports"]:
-                            urls.append(item["subdomain"]+":"+str(p))
+                        if len(item["shodan_ports"]) != 0:
+                            docs.append(item)
+                            for p in item["shodan_ports"]:
+                                urls.append(item["subdomain"]+":"+str(p))
 
                 print(colored('\nGetting screenshots...', 'magenta'))
                 with open("urls.txt", "w") as f:
@@ -262,7 +264,7 @@ class As3nt:
                         f.write(url+"\n")
                 self.get_screenshots()
                 os.remove("urls.txt")
-                print(colored('Screenshots saved to: /opt/screenshots', 'green'))
+                print(colored('Screenshots saved to: ./as3nt-elastic/screenshots', 'green'))
 
                 self.es = Elasticsearch(maxsize=25)
                 with ThreadPoolExecutor(max_workers=int(self.threads)) as pool:
