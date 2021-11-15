@@ -47,7 +47,7 @@ class As3nt:
             resolver.timeout = 3
             resolver.lifetime = 3
             #gets A records and starts populating main dict, drops CNAME
-            try: 
+            try:
                 A = resolver.resolve(subdomain, 'A')
                 for rec in A.response.answer:
                     if 'CNAME' not in rec.to_text():
@@ -56,7 +56,7 @@ class As3nt:
             except:
                 pass
             #gets AAAA records, drops CNAME
-            try: 
+            try:
                 AAAA = resolver.resolve(subdomain, 'AAAA')
                 for rec in AAAA.response.answer:
                     if 'CNAME' not in rec.to_text():
@@ -65,7 +65,7 @@ class As3nt:
             except:
                 pass
             #gets MX records, note these are also a subdomain rather than IP.
-            try: 
+            try:
                 MX = resolver.resolve(subdomain, 'MX')
                 for rec in MX.response.answer:
 
@@ -79,7 +79,7 @@ class As3nt:
             print('\nError in getrecords:')
             print(e)
             sys.exit(2)
-    
+
     def getasn(self,asset):
         #gets ASN data using ipwhois module and RDAP lookup
         try:
@@ -99,7 +99,7 @@ class As3nt:
                     cidr = asdata['adn_cidr']
                     pass
                 pass
-            self.datadict[asset['subdomain']+asset['ip']].update({'asn':asn, 'asn_description':asndesc, 'asn_netblock':cidr, 'asn_netname':name}) 
+            self.datadict[asset['subdomain']+asset['ip']].update({'asn':asn, 'asn_description':asndesc, 'asn_netblock':cidr, 'asn_netname':name})
         except KeyboardInterrupt:
             raise
         except Exception as e:
@@ -183,15 +183,21 @@ class As3nt:
 
     def get_screenshots(self):
         try:
-            subprocess.run(["gowitness", "--disable-db", "file", "-f", "urls.txt", "-P", "./as3nt-elastic/screenshots"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            #subprocess.run(["gowitness", "--disable-db", "file", "-f", "urls.txt", "-P", "./as3nt-elastic/screenshots"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            p = subprocess.run(["gowitness", "--disable-db", "file", "-f", "urls.txt", "-P", "./as3nt-elastic/screenshots", "-t", str(self.threads)], )
+            while True:
+                if p.stdout:
+                    print(p.stdout.next().replace("\n", ""))
+                else:
+                    break
         except KeyboardInterrupt:
             raise
-        except Exception as e: 
+        except Exception as e:
             print("\nError in get_screenshots")
             print(e)
             #sys.exit(1)
             pass
-    
+
     def send_data(self, data):
         try:
             data["screenshots"] = []
@@ -206,7 +212,7 @@ class As3nt:
             res = self.es.index(index="as3nt-"+self.target+"-"+str(datetime.now().isocalendar()[1])+"-"+str(datetime.now().isocalendar()[0]), id=hashlib.sha1(bytes(data["subdomain"]+data["ip"], 'utf8')).hexdigest(), document=data)
         except KeyboardInterrupt:
             raise
-        except Exception as e: 
+        except Exception as e:
             print("\nError in send_data")
             print(e)
             #sys.exit(1)
@@ -251,12 +257,17 @@ class As3nt:
             if self.bb:
                 docs = []
                 urls = []
+                self.es = Elasticsearch(maxsize=self.threads)
                 for item in dictlist:
                     if "shodan_ports" in item:
                         if len(item["shodan_ports"]) != 0:
                             docs.append(item)
                             for p in item["shodan_ports"]:
                                 urls.append(item["subdomain"]+":"+str(p))
+
+                with ThreadPoolExecutor(max_workers=int(self.threads)) as pool:
+                    print(colored('\nSending to elastic...', 'magenta'))
+                    list(tqdm(pool.map(self.send_data, docs), total=len(docs)))
 
                 print(colored('\nGetting screenshots...', 'magenta'))
                 with open("urls.txt", "w") as f:
@@ -266,12 +277,10 @@ class As3nt:
                 os.remove("urls.txt")
                 print(colored('Screenshots saved to: ./as3nt-elastic/screenshots', 'green'))
 
-                self.es = Elasticsearch(maxsize=25)
                 with ThreadPoolExecutor(max_workers=int(self.threads)) as pool:
-                    print(colored('\nSending to elastic...', 'magenta'))
+                    print(colored('\nUpdating elastic...', 'magenta'))
                     list(tqdm(pool.map(self.send_data, docs), total=len(docs)))
                 print(colored('Bounty hunt complete!', 'green'))
-                return
 
             elif self.output:
                 keylist = [list(x.keys()) for x in dictlist]
@@ -308,7 +317,7 @@ def main():
     required.add_argument('-o', action='store', dest='output', help='Outputs to a csv.')
     optional.add_argument('-s', action='store_true', dest='subdomains', help='Use for inputing a list of subdomains.')
     optional.add_argument('-so', action='store_true', dest='subonly', help='If specified, will only perform subdomain enumeration.')
-    optional.add_argument('-td', action='store', dest='threads', help='Specify number of threads used (defaults to 25).', default=25)
+    optional.add_argument('-td', action='store', dest='threads', help='Specify number of threads used (defaults to 40).', default=40)
     optional.add_argument('-11', action='store_true', dest='eleven', help='Choose this option to enable all modules.')
     optional.add_argument('-as', action='store_true', dest='asn', help='This option enables the ASN data module.')
     optional.add_argument('-sh', action='store_true', dest='shodan', help='This option enables the Shodan data module.')
@@ -397,7 +406,7 @@ Optional arguments:
             sys.exit(1)
     else:
         try:
-            as3nt = As3nt(target,args.threads,args.asn,args.shodan,args.output,shodankey,args.subdomains,args.subonly,args.bb) 
+            as3nt = As3nt(target,args.threads,args.asn,args.shodan,args.output,shodankey,args.subdomains,args.subonly,args.bb)
             as3nt.run()
         except KeyboardInterrupt:
             print(colored('Exiting...', 'red'))
