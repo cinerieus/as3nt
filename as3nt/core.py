@@ -184,7 +184,7 @@ class As3nt:
     def get_screenshots(self):
         try:
             #subprocess.run(["gowitness", "--disable-db", "file", "-f", "urls.txt", "-P", "./as3nt-elastic/screenshots"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            p = subprocess.run(["gowitness", "--disable-db", "file", "-f", "urls.txt", "-P", "./as3nt-elastic/screenshots", "-t", str(self.threads)], )
+            p = subprocess.run(["gowitness", "--disable-db", "file", "-f", "urls.txt", "-P", "./as3nt-elastic/screenshots", "-t", str(self.threads)])
             while True:
                 if p.stdout:
                     print(p.stdout.next().replace("\n", ""))
