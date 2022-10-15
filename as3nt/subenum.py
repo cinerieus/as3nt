@@ -19,9 +19,7 @@ class SubEnum:
         self.sources = [
                 self.VirusTotal,
                 self.HackerTarget, 
-                self.ThreatCrowd,
                 self.ThreatMiner,
-                self.BufferOver,
                 self.urlscan_io,
                 self.crt_sh
                 ]
@@ -99,18 +97,6 @@ class SubEnum:
         except:
             print(colored('[-] HackerTarget - Error in response!', 'red'))       
 
-    # ThreatCrowd feed
-    def ThreatCrowd(self):
-        try:
-            get = requests.get('https://www.threatcrowd.org/searchApi/v2/domain/report/?domain='+self.tld)
-            result = json.loads(get.text)
-            if result['response_code'] != '0':
-                self.sublist.extend(result['subdomains'])
-        except KeyboardInterrupt:
-            raise
-        except:
-            print(colored('[-] ThreatCrowd - Hit rate limiting!', 'red'))       
-
     # ThreatMiner feed
     def ThreatMiner(self):
         try:
@@ -123,27 +109,6 @@ class SubEnum:
         except:
             print(colored('[-] ThreatMiner - Error in response!', 'red'))       
     
-    # BufferOver feed
-    def BufferOver(self):
-        try:
-            mlist = []
-            get = requests.get('https://dns.bufferover.run/dns?q=.'+self.tld)
-            result = json.loads(get.text)
-            if result['FDNS_A']:
-                mlist.extend(result['FDNS_A'])
-            if result['RDNS']:
-                mlist.extend(result['RDNS'])
-            for i in mlist:
-                try:
-                    self.sublist.append(i.split(',')[1])
-                except:
-                    self.sublist.append(i)
-                    pass
-        except KeyboardInterrupt:
-            raise
-        except:
-            print(colored('[-] BufferOver - Error in response!', 'red'))
-
     # urlscan.io feed
     def urlscan_io(self):
         try:

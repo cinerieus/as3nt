@@ -1,5 +1,8 @@
 # Changelog 
 
+## 1.1.0
+- Removed BufferOver & ThreatCrowd feeds as they are no longer available.
+
 ## 1.0.9
 - Fixed issue with bulk ASN lookups.
 

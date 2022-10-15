@@ -1,11 +1,11 @@
-![Version 1.0.9](http://img.shields.io/badge/version-v1.0.9-purple.svg)
+![Version 1.1.0](http://img.shields.io/badge/version-v1.1.0-purple.svg)
 ![Python 3.8](http://img.shields.io/badge/python-3.8-yellow.svg)
 [![GPL License](http://img.shields.io/badge/license-GPL%20License-blue.svg)](https://github.com/cinerieus/as3nt/blob/master/LICENSE)  
 
 ## As3nt
 Another Subdomain ENumeration Tool - written in python to enumerate and enrich subdomains using passive OSINT.  
 
-As3nt can target TLDs or subdomains. The enumeration uses; VirusTotal, HackerTarget, ThreatCrowd, ThreatMiner, BufferOver, urlscan.io and crt.sh. Each subdomain IP is resolved using public DNS servers and the data is enriched using ipwhois and Shodan. As3nt currently outputs to terminal or csv. 
+As3nt can target TLDs or subdomains. The enumeration uses; VirusTotal, HackerTarget, ThreatMiner, urlscan.io and crt.sh. Each subdomain IP is resolved using public DNS servers and the data is enriched using ipwhois and Shodan. As3nt currently outputs to terminal or csv. 
 
 Along with using the tags from Shodan, this tool also adds it's own tags. Currently there are tags added based on certain HTML content found by Shodan like tomcat, fortinet, netscaler and pulse vpn. Also if any CVEs are found for an IP/Subdomain with a CVSS score >= 7.8, these assets are tagged to highlight a possible exploit. 
 
@@ -21,8 +21,8 @@ Along with using the tags from Shodan, this tool also adds it's own tags. Curren
 	- `pip install -r requirements.txt`
 	- `python ./as3nt/core.py` 
   - from git (releases):
-	- `wget https://github.com/cinerieus/as3nt/archive/v1.0.9.tar.gz`
-	- `pip install v1.0.9.tar.gz` 
+	- `wget https://github.com/cinerieus/as3nt/archive/v1.1.0.tar.gz`
+	- `pip install v1.1.0.tar.gz` 
 2. Remember to check PATH if you installed in ~/.local/bin/ 
 3. Profit! 
 
